@@ -1,21 +1,18 @@
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, JoinTable, CreateDateColumn, DeleteDateColumn, OneToOne, OneToMany, ManyToOne, ManyToMany } from "typeorm";
+import { BaseEntity } from './base'
 
 @Entity()
-export class User {
-
-    @PrimaryGeneratedColumn('uuid', {
-
-    })
-  id!: number;
-
-    @Column('varchar')
-  firstName!: string;
+export class User extends BaseEntity {
 
     @Column('varchar', {
-      length: 255,
+      unique: true,
     })
-  lastName!: string;
+  name!: string;
 
-    @Column('integer')
-  age!: number;
+    @Column('date')
+    birthday?: Date;
+
+  @ManyToMany('Author', 'fans')
+  @JoinTable()
+    favAuthors?: Author[]
 }

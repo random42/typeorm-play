@@ -6,4 +6,5 @@ node_modules/
 tmp/
 .env
 _.sh
-
+data/
+.history/

@@ -8,7 +8,5 @@ COPY . .
 ENV NODE_ENV="development"
 ENV TZ="UTC"
 
-RUN ls
-RUN npm i
-RUN chmod -R u+x bin/
-CMD ["npm", "start"]
+RUN npm i && chmod -R u+x bin/
+CMD ["npm", "run", "dev"]
