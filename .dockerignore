@@ -1,0 +1,9 @@
+.git
+.cache
+.idea
+gen/
+node_modules/
+tmp/
+.env
+_.sh
+

@@ -1,0 +1,7 @@
+node_modules/
+build/
+gen/
+
+*.log
+.env
+_.sh
