@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "",
+  "engines": {
+    "node": "^16.13.0"
+  },
   "scripts": {
     "start": "node build/cmd/main.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec ts-node src/cmd/main.ts",
@@ -19,7 +22,8 @@
     "pg": "^8.5.1",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.31",
-    "typeorm-naming-strategies": "^2.0.0"
+    "typeorm-naming-strategies": "^2.0.0",
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@tsconfig/node14": "^1.0.1",
