@@ -1,11 +1,10 @@
 import "reflect-metadata";
-import { createConnection, FileLogger, getManager } from 'typeorm'
+import { createConnection, getConnectionOptions, FileLogger, getManager } from 'typeorm'
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 require('dotenv').config()
 
-import * as model from '../model'
+import { User, Author } from '../entity'
 
-const { User, Author } = model;
 
 const sleep = ms => new Promise((s) => setTimeout(s, ms));
 
@@ -15,22 +14,17 @@ const prettyJson = x => JSON.stringify(x, null, 2);
 const outPrettyJson = x => out(prettyJson(x));
 
 
-const { TYPEORM_URL, TYPEORM_ENTITIES } = process.env;
+const { env } = process;
 
 const AUTHORS = require('../../data/sample/author.json')
 
-async function run() {
+async function main() {
+  const opt = await getConnectionOptions();
   const c = await createConnection({
-    type: 'postgres',
-    url: TYPEORM_URL,
-    entities: Object.values(model),
-    logging: true,
+    ...opt,
     namingStrategy: new SnakeNamingStrategy(),
-    dropSchema: true,
-    synchronize: true,
   });
-  // out(c)
-  const m = getManager()
+  const { manager: m } = c;
   await m.save(Author, AUTHORS);
   let data;
   data = await m.find(Author, {
@@ -39,7 +33,7 @@ async function run() {
   outPrettyJson(data)
 }
 
-run()
+main()
   .then(() => process.exit(0))
   .catch((err) => {
     out(err)

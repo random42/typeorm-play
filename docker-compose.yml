@@ -2,8 +2,8 @@ version: "3.9"
 services:
   app:
     build: .
-    # ports:
-      # - "4000:4000"
+    ports:
+      - "4000:4000"
     volumes:
       - .:/app
     env_file: .env
@@ -15,7 +15,7 @@ services:
       - "5000:5432"
     environment:
       POSTGRES_DB: typeorm
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: xd
+      POSTGRES_USER: pg
+      POSTGRES_PASSWORD: pg
     volumes:
       - ./gen/pg:/var/lib/postgresql/data:delegated
