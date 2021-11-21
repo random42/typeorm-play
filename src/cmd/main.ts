@@ -22,6 +22,7 @@ async function main() {
   const opt = await getConnectionOptions();
   const c = await createConnection({
     ...opt,
+    dropSchema: true,
     namingStrategy: new SnakeNamingStrategy(),
   });
   const { manager: m } = c;

@@ -25,5 +25,3 @@ interface Chapter extends Base {
   text: string
   book: Book
 }
-
-

@@ -1,14 +1,14 @@
 version: "3.9"
 services:
-  app:
-    build: .
-    ports:
-      - "4000:4000"
-    volumes:
-      - .:/app
-    env_file: .env
-    depends_on:
-      - pg
+  # app:
+  #   build: .
+  #   ports:
+  #     - "4000:4000"
+  #   volumes:
+  #     - .:/app
+  #   env_file: .env
+  #   depends_on:
+  #     - pg
   pg:
     image: "postgres:alpine"
     ports:
