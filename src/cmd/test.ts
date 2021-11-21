@@ -16,7 +16,7 @@ const outPrettyJson = x => out(prettyJson(x));
 
 const { env } = process;
 
-const AUTHORS = require('../../data/sample/author.json')
+const AUTHORS = require('../../data/authors.json')
 
 async function main() {
   const opt = await getConnectionOptions();

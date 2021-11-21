@@ -8,5 +8,5 @@ COPY . .
 ENV NODE_ENV="development"
 ENV TZ="UTC"
 
-RUN npm i && chmod -R u+x bin/
+RUN npm i
 CMD ["npm", "run", "dev"]
