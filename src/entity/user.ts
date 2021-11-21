@@ -1,5 +1,6 @@
 import {Entity, PrimaryGeneratedColumn, Column, JoinTable, CreateDateColumn, DeleteDateColumn, OneToOne, OneToMany, ManyToOne, ManyToMany } from "typeorm";
 import { BaseEntity } from './base'
+import { Author } from "./author";
 
 @Entity()
 export class User extends BaseEntity {

@@ -1,5 +1,7 @@
 import {Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, ManyToOne, ManyToMany } from "typeorm";
 import { BaseEntity } from './base'
+import { Book } from "./book";
+import { User } from "./user";
 
 @Entity()
 export class Author extends BaseEntity {

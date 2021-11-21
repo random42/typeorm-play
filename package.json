@@ -2,10 +2,10 @@
   "name": "typeorm-play",
   "version": "1.0.0",
   "description": "",
-  "main": "build/index.js",
+  "main": "",
   "scripts": {
     "start": "node build/cmd/main.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' --files src/cmd/main.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec ts-node src/cmd/main.ts",
     "build": "tsc",
     "db:sync": "npm run typeorm schema:sync",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js"
@@ -22,8 +22,10 @@
     "typeorm-naming-strategies": "^2.0.0"
   },
   "devDependencies": {
+    "@tsconfig/node14": "^1.0.1",
     "@types/node": "^14.14.31",
     "nodemon": "^2.0.7",
+    "npm-run-all": "^4.1.5",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.5"
   }
