@@ -1,22 +1,27 @@
-import "reflect-metadata";
-import { createConnection, getConnectionOptions, FileLogger, getManager } from 'typeorm'
+import 'reflect-metadata';
+require('dotenv').config();
+import { DB } from '../db';
+import {
+  createConnection,
+  getConnectionOptions,
+  FileLogger,
+  getManager,
+} from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-require('dotenv').config()
+const debug = require('debug')('main');
 
-import { User, Author } from '../entity'
+import { User, Author } from '../entity';
 
-
-const sleep = ms => new Promise((s) => setTimeout(s, ms));
+const sleep = (ms) => new Promise((s) => setTimeout(s, ms));
 
 const log = console.error;
 const out = console.log;
-const prettyJson = x => JSON.stringify(x, null, 2);
-const outPrettyJson = x => out(prettyJson(x));
-
+const prettyJson = (x) => JSON.stringify(x, null, 2);
+const outPrettyJson = (x) => out(prettyJson(x));
 
 const { env } = process;
 
-const AUTHORS = require('../../data/authors.json')
+const AUTHORS = require('../../data/authors.json');
 
 async function main() {
   const opt = await getConnectionOptions();
@@ -25,18 +30,17 @@ async function main() {
     dropSchema: true,
     namingStrategy: new SnakeNamingStrategy(),
   });
-  const { manager: m } = c;
-  await m.save(Author, AUTHORS);
-  let data;
-  data = await m.find(Author, {
-    relations: ['books', 'books.chapters']
+  const db = new DB(c);
+  await db.save(Author, AUTHORS);
+  const data = await db.find(Author, {
+    relations: ['books', 'books.chapters'],
   });
-  outPrettyJson(data)
+  outPrettyJson(data);
 }
 
 main()
   .then(() => process.exit(0))
   .catch((err) => {
-    out(err)
-    process.exit(0)
-  })
+    out(err);
+    process.exit(0);
+  });

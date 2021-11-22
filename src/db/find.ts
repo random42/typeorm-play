@@ -1,6 +1,8 @@
 import { SelectQueryBuilder } from 'typeorm';
 import _ from 'lodash';
 import { isAlpha } from 'validator';
+import json from 'safe-json-stringify';
+// import assert from 'assert';
 
 const DEFAULT_OPS = {
   $and: 'AND',
@@ -40,7 +42,6 @@ const getLast = (path: string) => {
 
 const isDotPath = (s: string): boolean =>
   s.split('.').every((x) => {
-    if (x.length === 0) return false;
     let i;
     for (i = 0; i < x.length && isAlpha(x.charAt(i)); i++);
     return i === x.length;
@@ -48,13 +49,17 @@ const isDotPath = (s: string): boolean =>
 
 const isParam = (s: string): boolean => {
   return !!(
-    s && s.charAt(0) === ':' && Array.from(s.slice(1)).every((c) => isAlpha(c))
+    s.length > 0 &&
+    s.charAt(0) === ':' &&
+    Array.from(s.slice(1)).every((c) => isAlpha(c))
   );
 };
 
 const isOperation = (s: string): boolean => {
   return !!(
-    s && s.charAt(0) === '$' && Array.from(s.slice(1)).every((c) => isAlpha(c))
+    s.length > 0 &&
+    s.charAt(0) === '$' &&
+    Array.from(s.slice(1)).every((c) => isAlpha(c))
   );
 };
 
@@ -85,7 +90,10 @@ const fixRelations = (obj) => {
   return x;
 };
 
-type Where = Array<any>;
+type Relation = string;
+type Param = string;
+type Op = string;
+type Where = Array<Relation | Param | Op | Where>;
 
 export interface Query {
   where?: Where;
@@ -107,44 +115,31 @@ export class QueryBuilder<Entity> {
 
   constructor(
     private qb: SelectQueryBuilder<Entity>,
-    private entity: string,
     private query: Query,
     private operations: { [op: string]: string } = DEFAULT_OPS,
-  ) {
-    this.aliases = {};
-  }
+  ) {}
 
   build() {
+    this.qb.select();
     // parse `where` and `sort` before joining in order to
     // know relations that are not selected but
     // used in `where` conditions
+    // this.log();
     const { query } = this;
-    const sql = this.buildQuery(query.where);
+    if (query.where) {
+      const sql = this.buildQuery(query.where);
+      sql && this.qb.where(sql);
+    }
     this.joinRelations();
-    sql && this.qb.where(sql);
     this.setParameters(); // parameters gathered during 'where' parsing
     this.sort();
     this.paginate();
     this.cache();
+    this.log();
     return this.qb;
   }
 
-  // alias for a given dot path relation, create it if it doesn't exist
-  private getAlias(path: string) {
-    if (!path) return this.entity;
-    if (!this.aliases[path]) {
-      this.relations[path] = this.relations[path] || false;
-      this.aliases[path] = this.nextAlias.toString();
-      this.nextAlias++;
-    }
-    return this.aliases[path];
-  }
-
-  private getAliasedAttribute(path: string) {
-    return `${this.getAlias(getParent(path))}.${getLast(path)}`;
-  }
-
-  private buildQuery(token: any): string {
+  private buildQuery(token: Where[number]): string {
     if (Array.isArray(token)) {
       return `(${token.map((x) => this.buildQuery(x)).join(' ')})`;
     }
@@ -155,17 +150,32 @@ export class QueryBuilder<Entity> {
           throw new Error(`Invalid operation "${token}"`);
         } else return op;
       } else if (isDotPath(token)) {
-        // friends.profile
-        return `${this.getAliasedAttribute(token)}`;
+        // relation: friends.profile
+        return `"${this.getAliasedAttribute(token)}"`;
       } else if (isParam(token)) {
         return token;
-      } else {
-        throw new Error(`Invalid 'where' string "${token}"`);
       }
+    } else throw new Error(`Invalid token "${token}"`);
+    return '';
+  }
+
+  // alias for a given dot path relation, create it if it doesn't exist
+  private getAlias(path?: string): string {
+    if (!path) return this.qb.alias;
+    if (!this.aliases[path]) {
+      this.relations[path] = this.relations[path] || false;
+      this.aliases[path] = this.nextAlias.toString();
+      this.nextAlias++;
     }
+    return this.aliases[path];
+  }
+
+  private getAliasedAttribute(path: string): string {
+    return `${this.getAlias(getParent(path))}.${getLast(path)}`;
   }
 
   private joinRelations() {
+    this.log();
     const selected = this.query.relations || [];
     selected.forEach((r) => {
       this.relations[r] = true;
@@ -189,7 +199,9 @@ export class QueryBuilder<Entity> {
   }
 
   private setParameters() {
-    this.qb.setParameters(this.query.params);
+    if (this.query.params) {
+      this.qb.setParameters(this.query.params);
+    }
   }
 
   private sort() {
@@ -209,7 +221,7 @@ export class QueryBuilder<Entity> {
     if (page && !limit) {
       throw new Error('Cannot paginate with not "limit"');
     }
-    offset = page ? (page - 1) * limit : offset;
+    offset = page && limit ? page * limit : offset;
     if (offset) {
       this.qb.skip(offset);
     }
@@ -224,12 +236,20 @@ export class QueryBuilder<Entity> {
       this.qb.cache(cache);
     }
   }
+
+  log() {
+    console.error(
+      json(
+        {
+          ..._.pick(this, ['entity', 'query', 'relations', 'aliases']),
+          sql: this.qb.getSql(),
+        },
+        2,
+      ),
+    );
+  }
 }
 
-export const buildQuery = <Entity>(
-  qb: SelectQueryBuilder<Entity>,
-  entity: string,
-  query: Query,
-) => {
-  return new QueryBuilder(qb, entity, query).build();
+export const find = <Entity>(qb: SelectQueryBuilder<Entity>, query: Query) => {
+  return new QueryBuilder(qb, query).build();
 };

@@ -1,10 +1,17 @@
-import {Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn, OneToOne, OneToMany, ManyToOne, ManyToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  OneToOne,
+  OneToMany,
+  ManyToOne,
+  ManyToMany,
+} from 'typeorm';
 
 export class BaseEntity {
-
-    @PrimaryGeneratedColumn('uuid', {
-
-    })
+  @PrimaryGeneratedColumn('uuid', {})
   id!: number;
 
   @CreateDateColumn({

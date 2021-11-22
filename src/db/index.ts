@@ -6,22 +6,41 @@ import {
   ConnectionOptions,
   SelectQueryBuilder,
 } from 'typeorm';
-import { buildQuery, Query } from './find';
+import { find, Query } from './find';
 
 export class DB {
-  constructor(private conn?: Connection, private manager?: EntityManager) {}
+  private manager: EntityManager;
 
-  async connect(options?: ConnectionOptions) {
-    this.conn = await createConnection(options);
-    this.manager = this.conn.manager;
+  constructor(private conn: Connection, manager?: EntityManager) {
+    this.manager = manager || conn.manager;
+  }
+
+  // async connect(options?: ConnectionOptions) {
+  //   this.conn = await createConnection(options);
+  //   this.manager = this.conn.manager;
+  // }
+
+  async transaction(f: (db: DB) => Promise<any>) {
+    return this.manager.transaction((m) => f(new DB(m.connection, m)));
   }
 
   async find<Entity>(
     entity: { new (): Entity },
     query: Query,
   ): Promise<Entity[]> {
-    const qb: SelectQueryBuilder<Entity> = this.manager.createQueryBuilder();
-    buildQuery(qb, entity.name, query);
+    let qb: SelectQueryBuilder<Entity> = this.conn.createQueryBuilder(
+      entity,
+      entity.name,
+    );
+    qb = find(qb, query);
     return qb.getMany();
   }
+
+  // save = EntityManager.prototype.save;
+
+  save = (
+    ...args: Parameters<EntityManager['save']>
+  ): ReturnType<EntityManager['save']> => {
+    return this.manager.save(...args);
+  };
 }
