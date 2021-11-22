@@ -21,6 +21,8 @@ const DEFAULT_OPS = {
   $isNull: 'IS NULL',
   $isNotNull: 'IS NOT NULL',
   $between: 'BETWEEN',
+  $any: 'ANY',
+  $some: 'SOME',
 };
 
 // used to join relations in the right order
