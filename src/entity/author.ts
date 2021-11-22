@@ -25,5 +25,5 @@ export class Author extends BaseEntity {
   books?: Book[];
 
   @ManyToMany('User', 'favAuthors')
-  fans?: User[];
+  fans!: User[];
 }

@@ -5,8 +5,8 @@ import json from 'safe-json-stringify';
 // import assert from 'assert';
 
 const DEFAULT_OPS = {
-  $and: 'AND',
   $not: 'NOT',
+  $and: 'AND',
   $or: 'OR',
   $lt: '<',
   $lte: '<=',
@@ -124,10 +124,10 @@ export class QueryBuilder<Entity> {
     // parse `where` and `sort` before joining in order to
     // know relations that are not selected but
     // used in `where` conditions
-    // this.log();
     const { query } = this;
     if (query.where) {
       const sql = this.buildQuery(query.where);
+      console.error(sql)
       sql && this.qb.where(sql);
     }
     this.joinRelations();
@@ -135,7 +135,6 @@ export class QueryBuilder<Entity> {
     this.sort();
     this.paginate();
     this.cache();
-    this.log();
     return this.qb;
   }
 
@@ -151,7 +150,7 @@ export class QueryBuilder<Entity> {
         } else return op;
       } else if (isDotPath(token)) {
         // relation: friends.profile
-        return `"${this.getAliasedAttribute(token)}"`;
+        return `${this.getAliasedAttribute(token)}`;
       } else if (isParam(token)) {
         return token;
       }
@@ -175,7 +174,6 @@ export class QueryBuilder<Entity> {
   }
 
   private joinRelations() {
-    this.log();
     const selected = this.query.relations || [];
     selected.forEach((r) => {
       this.relations[r] = true;
@@ -190,6 +188,7 @@ export class QueryBuilder<Entity> {
       }
       const attr = this.getAliasedAttribute(r);
       const alias = this.getAlias(r);
+      console.error(attr, alias);
       if (this.relations[r]) {
         this.qb.leftJoinAndSelect(attr, alias);
       } else {
@@ -219,7 +218,7 @@ export class QueryBuilder<Entity> {
     const { page, limit } = this.query;
     let { offset = 0 } = this.query;
     if (page && !limit) {
-      throw new Error('Cannot paginate with not "limit"');
+      throw new Error('Cannot paginate with no "limit"');
     }
     offset = page && limit ? page * limit : offset;
     if (offset) {

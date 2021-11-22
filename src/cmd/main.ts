@@ -33,7 +33,17 @@ async function main() {
   const db = new DB(c);
   await db.save(Author, AUTHORS);
   const data = await db.find(Author, {
-    relations: ['books', 'books.chapters'],
+    where: [
+      ['birthday', '$between', ':from', '$and', ':to'],
+      '$or',
+      ['books.chapters.name', '$ilike', ':n']
+    ],
+    params: {
+      from: '1990-01-01',
+      to: '1991-01-01',
+      n: '%eh%',
+    },
+    relations: ['books'],
   });
   outPrettyJson(data);
 }
