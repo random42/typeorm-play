@@ -110,15 +110,15 @@ export interface Query {
 
 export class QueryBuilder<Entity> {
   // maps dot path relation to true if relation is selected, false if relation is only used in query
-  private relations: { [r: string]: boolean } = {};
+  private relations: Record<string,boolean> = {};
   private nextAlias = 0;
   // maps dot path relation to an integer string in order to avoid aliases longer than 63 characters (Postgres limitation)
-  private aliases: { [r: string]: string } = {};
+  private aliases: Record<string,string>= {};
 
   constructor(
     private qb: SelectQueryBuilder<Entity>,
     private query: Query,
-    private operations: { [op: string]: string } = DEFAULT_OPS,
+    private operations: Record<string, Op> = DEFAULT_OPS,
   ) {}
 
   build() {
@@ -251,6 +251,8 @@ export class QueryBuilder<Entity> {
   }
 }
 
-export const find = <Entity>(qb: SelectQueryBuilder<Entity>, query: Query) => {
-  return new QueryBuilder(qb, query).build();
+export const find = <Entity>(qb: SelectQueryBuilder<Entity>, query: Query, 
+  operations?: Record<string, Op>,
+  ) => {
+  return new QueryBuilder(qb, query, operations).build();
 };

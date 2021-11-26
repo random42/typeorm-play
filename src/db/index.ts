@@ -1,46 +1,41 @@
-import assert from 'assert';
 import {
-  createConnection,
-  EntityManager,
-  Connection,
-  ConnectionOptions,
+  EntityManager as EM,
   SelectQueryBuilder,
 } from 'typeorm';
+import { IsolationLevel } from "typeorm/driver/types/IsolationLevel";
+import { EntityTarget } from "typeorm/common/EntityTarget";
 import { find, Query } from './find';
 
-export class DB {
-  private manager: EntityManager;
+export class EntityManager extends EM {
 
-  constructor(private conn: Connection, manager?: EntityManager) {
-    this.manager = manager || conn.manager;
+  transaction<T>(runInTransaction: (m: EntityManager) => Promise<T>): Promise<T>;
+  transaction<T>(isolationLevel: IsolationLevel, runInTransaction: (m: EntityManager) => Promise<T>): Promise<T>;
+
+
+  transaction<T>(x, y?) {
+    const func: (manager: EntityManager) => Promise<T> = y || x;
+    const isolationLevel: IsolationLevel = y && x;
+    const run = function(manager: EM) {
+      const clone: EntityManager = Object.create(EntityManager.prototype, Object.getOwnPropertyDescriptors(manager));
+      return func(clone);
+    };
+    if (!isolationLevel) {
+      return super.transaction(run);
+    } else {
+      return super.transaction(isolationLevel, run);
+    }
   }
 
-  // async connect(options?: ConnectionOptions) {
-  //   this.conn = await createConnection(options);
-  //   this.manager = this.conn.manager;
-  // }
-
-  async transaction(f: (db: DB) => Promise<any>) {
-    return this.manager.transaction((m) => f(new DB(m.connection, m)));
-  }
-
-  async find<Entity>(
-    entity: { new (): Entity },
+  selectQuery<Entity>(
+    entityClass: EntityTarget<Entity>,
     query: Query,
-  ): Promise<Entity[]> {
-    let qb: SelectQueryBuilder<Entity> = this.conn.createQueryBuilder(
-      entity,
-      entity.name,
+  ): SelectQueryBuilder<Entity> {
+    const metadata = this.connection.getMetadata(entityClass);
+    let qb: SelectQueryBuilder<Entity> = this.createQueryBuilder(
+      entityClass,
+      metadata.name,
     );
     qb = find(qb, query);
-    return qb.getMany();
+    return qb;
   }
-
-  // save = EntityManager.prototype.save;
-
-  save = (
-    ...args: Parameters<EntityManager['save']>
-  ): ReturnType<EntityManager['save']> => {
-    return this.manager.save(...args);
-  };
 }

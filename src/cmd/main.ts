@@ -1,11 +1,11 @@
 import 'reflect-metadata';
 require('dotenv').config();
-import { DB } from '../db';
+import { EntityManager } from '../db';
 import {
   createConnection,
   getConnectionOptions,
-  FileLogger,
   getManager,
+  Entity,
 } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 const debug = require('debug')('main');
@@ -30,9 +30,9 @@ async function main() {
     dropSchema: true,
     namingStrategy: new SnakeNamingStrategy(),
   });
-  const db = new DB(c);
+  const db: EntityManager = Object.create(EntityManager.prototype, Object.getOwnPropertyDescriptors(c.manager));
   await db.save(Author, AUTHORS);
-  const data = await db.find(Author, {
+  const data = await db.selectQuery('Author', {
     where: [
       ['books.name', '$eq', '$any', [':n']]
     ],
@@ -40,7 +40,7 @@ async function main() {
       n: ['book1'],
     },
     relations: ['books'],
-  });
+  }).getMany();
   outPrettyJson(data);
 }
 
