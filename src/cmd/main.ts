@@ -1,16 +1,16 @@
 import 'reflect-metadata';
 require('dotenv').config();
-import { EntityManager } from '../db';
 import {
   createConnection,
   getConnectionOptions,
   Transaction,
   TransactionManager,
-  EntityManager as EM,
+  EntityManager,
   getManager,
   Entity,
 } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import select from 'typeorm-select';
 const debug = require('debug')('main');
 
 import { User, Author, Book } from '../entity';
@@ -29,8 +29,6 @@ const AUTHORS = require('../../data/authors.json');
 class Test {
   @Transaction()
   async ts(@TransactionManager() m: EntityManager) {
-    console.error(m instanceof EntityManager);
-    console.error(m instanceof EM);
     return m.find(Book);
   }
 }
@@ -44,13 +42,22 @@ async function main() {
     // dropSchema: true,
     namingStrategy: new SnakeNamingStrategy(),
   });
-  const db: EntityManager = Object.create(EntityManager.prototype, Object.getOwnPropertyDescriptors(c.manager));
+  const db = getManager();
   // await db.save(Author, AUTHORS);
   const x = new Test();
-  const data = await db.transaction(m => m.find(Book));
-  // const data = await x.ts(db);
-  log('data', data.length)
-  // outPrettyJson(data);
+  const data = await select(Author, {
+    where: ['books.name', '$ilike', '%'],
+    params: {
+      x: '%',
+    },
+    sort: {
+      'books.id': 'DESC'
+    },
+    relations: ['books.chapters'],
+    // limit: 2,
+  }, db).getMany();
+  // log('data', data)
+  outPrettyJson(data);
 }
 
 main()

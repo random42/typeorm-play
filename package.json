@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "",
+  "repository": "github:random42/typeorm-play",
   "engines": {
     "node": "^16.13.0"
   },
@@ -13,7 +14,7 @@
     "db:sync": "npm run typeorm schema:sync",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
+    "lint": "eslint \"src/**/*.ts\" --fix"
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +28,7 @@
     "safe-json-stringify": "^1.2.0",
     "typeorm": "^0.2.31",
     "typeorm-naming-strategies": "^2.0.0",
+    "typeorm-select": "github:random42/typeorm-select",
     "validator": "^13.7.0"
   },
   "devDependencies": {
