@@ -96,12 +96,13 @@ type Relation = string;
 type Param = string;
 type Op = string;
 type Where = Array<Relation | Param | Op | Where>;
+type Sort = 'ASC' | 'DESC';
 
 export interface Query {
   where?: Where;
-  params?: { [p: string]: any };
+  params?: Record<string,any>;
   relations?: string[];
-  sort?: { [r: string]: 'DESC' | 'ASC' };
+  sort?: Record<string,Sort>;
   offset?: number;
   limit?: number;
   page?: number;

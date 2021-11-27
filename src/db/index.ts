@@ -13,6 +13,7 @@ export class EntityManager extends EM {
 
 
   transaction<T>(x, y?) {
+    console.error('transaction');
     const func: (manager: EntityManager) => Promise<T> = y || x;
     const isolationLevel: IsolationLevel = y && x;
     const run = function(manager: EM) {
