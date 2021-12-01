@@ -4,9 +4,6 @@
   "description": "",
   "main": "",
   "repository": "github:random42/typeorm-play",
-  "engines": {
-    "node": "^16.13.0"
-  },
   "scripts": {
     "start": "node build/cmd/main.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec ts-node src/cmd/main.ts",

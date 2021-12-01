@@ -46,7 +46,7 @@ async function main() {
   // await db.save(Author, AUTHORS);
   const x = new Test();
   const data = await select(Author, {
-    where: ['books.name', '$ilike', '%'],
+    where: ['books.name', '$ilike', ':x'],
     params: {
       x: '%',
     },
